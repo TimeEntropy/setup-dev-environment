@@ -318,7 +318,7 @@ int main(int argc, char* argv[]) {
 			"program": "${workspaceFolder}/build/${workspaceFolderBasename}",
 			"args": [],
 			"cwd": "${workspaceFolder}",
-			"preLaunchTask": "CMake: Build",
+			"preLaunchTask": "CMake: 生成",
 		}
 	]
 }
