@@ -86,6 +86,8 @@
 	[https]
 		sslbackend = openssl
 		sslVerify  = false
+	[receive]
+		keepAlive = true
 	```
    > **提示: 你可以使用`git config --help`命令找到所有的配置变量，
      就在`Variables`小节里**
