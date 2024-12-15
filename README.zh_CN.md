@@ -53,13 +53,15 @@
    git config --global mergetool.vscode.cmd 'code --wait $MERGED'
 
    # 如果你在做git操作时网络不好，可以尝试这些配置命令：
+   git config --global http.sslbackend openssl
+   git config --global http.sslVerify false
    git config --global https.sslbackend openssl
    git config --global https.sslVerify false
    git config --global receive.keepAlive true
    ```
    或者你可以编辑文件`%USERPROFILE%/.gitconfig`，<br>
    拷贝以下内容覆盖进配置文件中（别忘了替换掉${_}字符串**）：
-	```toml
+	```ini
 	[core]
 		autocrlf = true
 		editor   = code
@@ -71,14 +73,16 @@
 
 	[diff]
 		tool = vscode
-	[merge]
-		tool = vscode
-
 	[difftool "vscode"]
 		cmd = code --wait --diff $LOCAL $REMOTE
+	[merge]
+		tool = vscode
 	[mergetool "vscode"]
 		cmd = code --wait $MERGED
 
+	[http]
+		sslbackend = openssl
+		sslVerify  = false
 	[https]
 		sslbackend = openssl
 		sslVerify  = false
@@ -97,13 +101,13 @@
 #### 环境变量
 
 - 新建
-  |     键     |          值           | 含义          |
-  | :--------: | :-------------------: | :------------ |
+  |      键      |           值            | 含义            |
+  | :----------: | :---------------------: | :-------------- |
   | `CMAKE_ROOT` | `${cmake-install-path}` | cmake的安装路径 |
 
 - 在`PATH`中添加：
-  |        值        | 用途                                        |
-  | :--------------: | :------------------------------------------ |
+  |         值         | 用途                                  |
+  | :----------------: | :------------------------------------ |
   | `%CMAKE_ROOT%/bin` | 在本地命令提示符中可以使用`cmake`指令 |
 
 ### llvm-mingw
@@ -116,20 +120,20 @@
 
 因为在LLVM19中，`stdc++`将不再支持 **`std::char_traits<unsigned int>`的默认模板特化**，
 但直到今天(2024/12/14)，一些库（例如[sfml](https://github.com/SFML/SFML)、
-[efsw](https://github.com/SpartanJ/efsw)等）还在使用这个模板特化
+[efsw](https://github.com/SpartanJ/efsw)等）还在使用这个模板特化，因此当你在使用这些库参与构建时就会遇到“**模板实例找不到**”的异常！
 
 细节参考：https://libcxx.llvm.org/ReleaseNotes/19.html#deprecations-and-removals
 
 #### 环境变量
 
 - 新建
-  |     键     |          值           | 含义          |
-  | :--------: | :-------------------: | :------------ |
+  |        键         |              值              | 含义                 |
+  | :---------------: | :--------------------------: | :------------------- |
   | `LLVM_MINGW_ROOT` | `${llvm-mingw-install-path}` | llvm-mingw的安装路径 |
 
 - 在`PATH`中添加：
-  |        值        | 用途                                        |
-  | :--------------: | :------------------------------------------ |
+  |           值            | 用途                                                                                |
+  | :---------------------: | :---------------------------------------------------------------------------------- |
   | `%LLVM_MINGW_ROOT%/bin` | 在本地命令提示符中可以使用llvm-mingw提供的工具集，<br>如`clang`、`clangd`、`lldb`等 |
 
 ### VSCode
@@ -143,13 +147,13 @@
 #### 环境变量
 
 - 新建
-  |     键     |          值           | 含义          |
-  | :--------: | :-------------------: | :------------ |
+  |      键       |            值            | 含义             |
+  | :-----------: | :----------------------: | :--------------- |
   | `VSCODE_ROOT` | `${vscode-install-path}` | VSCode的安装路径 |
 
 - 在`PATH`中添加：
-  |        值        | 用途                                        |
-  | :--------------: | :------------------------------------------ |
+  |         值          | 用途                                               |
+  | :-----------------: | :------------------------------------------------- |
   | `%VSCODE_ROOT%/bin` | 在本地命令提示符中可以使用`code`指令直接打开VSCode |
 
 #### 为VSCode安装插件
@@ -177,16 +181,17 @@
    ```
 3. clone完成后执行：
    ```shell
-   cd vcpkg; .\bootstrap-vcpkg.bat
+   cd vcpkg; ./bootstrap-vcpkg.bat
    ```
    等待vcpkg安装完成
 
 #### 环境变量
 
-|              键              |           值            | 含义                  |
-| :--------------------------: | :---------------------: | :-------------------- |
-|         `VCPKG_ROOT`         | `${vcpkg-install-path}` | vcpkg的安装路径       |
-| `VCPKG_DEFAULT_HOST_TRIPLET` |   `x64-mingw-static`    | vcpkg的主机默认三元组 |
+|              键              |           值            | 含义                                                      |
+| :--------------------------: | :---------------------: | :-------------------------------------------------------- |
+|         `VCPKG_ROOT`         | `${vcpkg-install-path}` | vcpkg的安装路径                                           |
+| `VCPKG_DEFAULT_HOST_TRIPLET` |   `x64-mingw-static`    | vcpkg的主机默认三元组                                     |
+|   `VCPKG_DEFAULT_TRIPLET`    |   `x64-mingw-static`    | vcpkg的目标默认三元组，在安装库时也将使用该变量构建目标库 |
 
 ## 3. 编写C++程序的示例
 
@@ -216,17 +221,17 @@
 ```CMake
 cmake_minimum_required(VERSION 3.10.0)
 
+# vcpkg configs
 set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 if(NOT DEFINED VCPKG_TARGET_TRIPLET)
 	set(VCPKG_TARGET_TRIPLET x64-mingw-static)
 endif()
-message("This project will use triplet '${VCPKG_TARGET_TRIPLET}' to find vcpkg installed packages")
 
 # packages
 find_package(SDL2 CONFIG REQUIRED)
 
 # variables
-set(PROJECT_NAME test)
+set(TEST_PROJECT_NAME test)
 set(SDL2_LIBS
 	$<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
 	$<IF:$<TARGET_EXISTS:SDL2::SDL2>, SDL2::SDL2, SDL2::SDL2-static>
@@ -236,14 +241,14 @@ set(SDL2_LIBS
 file(GLOB_RECURSE SRC_FILES "src/*.cpp")
 
 # top project declare
-project(${PROJECT_NAME} CXX)
+project(${TEST_PROJECT_NAME} CXX)
 
 # targets
-add_executable(${PROJECT_NAME} ${SRC_FILES})
-target_include_directories(${PROJECT_NAME} SYSTEM BEFORE
+add_executable(${TEST_PROJECT_NAME} ${SRC_FILES})
+target_include_directories(${TEST_PROJECT_NAME} SYSTEM BEFORE
 	PRIVATE ${SDL2_INCLUDE_DIRS}
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${TEST_PROJECT_NAME} PRIVATE
 	${SDL2_LIBS}
 )
 ```
