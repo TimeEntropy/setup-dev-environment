@@ -221,16 +221,13 @@
    ```
 7. `CMakeLists.txt`：
 ```CMake
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.20.0)
 
 # vcpkg configs
 set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 if(NOT DEFINED VCPKG_TARGET_TRIPLET)
 	set(VCPKG_TARGET_TRIPLET x64-mingw-static)
 endif()
-
-# packages
-find_package(SDL2 CONFIG REQUIRED)
 
 # variables
 set(TEST_PROJECT_NAME test)
@@ -244,6 +241,9 @@ file(GLOB_RECURSE SRC_FILES "src/*.cpp")
 
 # top project declare
 project(${TEST_PROJECT_NAME} CXX)
+
+# packages
+find_package(SDL2 CONFIG REQUIRED)
 
 # targets
 add_executable(${TEST_PROJECT_NAME} ${SRC_FILES})
